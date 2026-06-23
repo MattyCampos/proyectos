@@ -1,6 +1,5 @@
 const usuario_id = localStorage.getItem('usuario_id');
 const nombre_usuario = localStorage.getItem('nombre_usuario');
-const API_URL = 'http://localhost:3000';
 
 if (!usuario_id) {
     window.location.href = 'login.html';
@@ -9,7 +8,6 @@ if (!usuario_id) {
 let grafico;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Mostrar saludo personalizado
     if (nombre_usuario) {
         document.getElementById('saludo').textContent = `Hola ${nombre_usuario} 👋`;
     }
@@ -20,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('precio_kwh').addEventListener('input', calcularConsumo);
 });
 
-// Función para formatear en pesos chilenos
 function formatoCLP(valor) {
     return new Intl.NumberFormat('es-CL', {
         style: 'currency',
@@ -30,7 +27,6 @@ function formatoCLP(valor) {
     }).format(valor);
 }
 
-// Función para formatear números con separador de miles
 function formatoNumero(valor, decimales = 0) {
     return new Intl.NumberFormat('es-CL', {
         minimumFractionDigits: decimales,
@@ -108,7 +104,7 @@ async function guardarConsumo() {
     };
 
     try {
-        const response = await fetch(`${API_URL}/consumo`, {
+        const response = await fetch('/consumo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datos)
@@ -137,7 +133,7 @@ async function guardarConsumo() {
 
 async function cargarHistorial() {
     try {
-        const response = await fetch(`${API_URL}/consumo/${usuario_id}`);
+        const response = await fetch(`/consumo/${usuario_id}`);
         const datos = await response.json();
 
         const tabla = document.getElementById('tabla-historial');
@@ -197,7 +193,7 @@ async function eliminarConsumo(id_consumo) {
     if (!confirm('¿Estás seguro de eliminar este registro?')) return;
 
     try {
-        const response = await fetch(`${API_URL}/consumo/${id_consumo}`, {
+        const response = await fetch(`/consumo/${id_consumo}`, {
             method: 'DELETE'
         });
 
