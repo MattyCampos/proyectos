@@ -6,20 +6,20 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// CONEXION POSTGRES - Usa DATABASE_URL de Render
+// CONEXION SUPABASE
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.DATABASE_URL, // ← Esta será la URL de Supabase
     ssl: {
         rejectUnauthorized: false
     }
 });
 
-// Verificar conexión a la base de datos
+// Verificar conexión
 pool.connect((err) => {
     if (err) {
-        console.error('❌ Error conectando a PostgreSQL:', err.message);
+        console.error('❌ Error conectando a Supabase:', err.message);
     } else {
-        console.log('✅ Conectado a PostgreSQL en Render');
+        console.log('✅ Conectado a Supabase');
     }
 });
 
@@ -27,7 +27,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// ENDPOINT REGISTRO
+// ============ TUS ENDPOINTS (igual que antes) ============
+
 app.post('/registro', async (req, res) => {
     const { nombre_usuario, contrasena_usuario } = req.body;
 
@@ -53,7 +54,6 @@ app.post('/registro', async (req, res) => {
     }
 });
 
-// ENDPOINT LOGIN
 app.post('/login', async (req, res) => {
     const { nombre_usuario, contrasena_usuario } = req.body;
 
@@ -80,7 +80,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// ENDPOINT GUARDAR CONSUMO
 app.post('/consumo', async (req, res) => {
     const {
         usuario_id,
@@ -146,7 +145,6 @@ app.post('/consumo', async (req, res) => {
     }
 });
 
-// ENDPOINT HISTORIAL
 app.get('/consumo/:usuario_id', async (req, res) => {
     const { usuario_id } = req.params;
 
@@ -165,7 +163,6 @@ app.get('/consumo/:usuario_id', async (req, res) => {
     }
 });
 
-// ENDPOINT ELIMINAR CONSUMO
 app.delete('/consumo/:id_consumo', async (req, res) => {
     const { id_consumo } = req.params;
 
