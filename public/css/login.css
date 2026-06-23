@@ -1,0 +1,109 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.contenedor-login {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 400px;
+}
+
+.contenedor-login h1 {
+    text-align: center;
+    font-size: 2rem;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.contenedor-login h2 {
+    text-align: center;
+    color: #4a5568;
+    font-weight: 400;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.contenedor-login input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.contenedor-login input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.contenedor-login button {
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.contenedor-login button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.contenedor-login button:active {
+    transform: scale(0.98);
+}
+
+#mensaje {
+    margin-top: 1rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+}
+
+#mensaje.success {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+#mensaje.error {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+.contenedor-login a {
+    display: block;
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.contenedor-login a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
