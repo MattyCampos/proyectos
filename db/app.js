@@ -6,17 +6,28 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// CONEXION POSTGRES - Usando DATABASE_URL de Render
+// CONEXION POSTGRES - Usa DATABASE_URL de Render
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:1243@localhost:5432/tu_consumo',
-    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+
+// Verificar conexión a la base de datos
+pool.connect((err) => {
+    if (err) {
+        console.error('❌ Error conectando a PostgreSQL:', err.message);
+    } else {
+        console.log('✅ Conectado a PostgreSQL en Render');
+    }
 });
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// ENDPOINT REGISTRO DE USUARIO
+// ENDPOINT REGISTRO
 app.post('/registro', async (req, res) => {
     const { nombre_usuario, contrasena_usuario } = req.body;
 
@@ -37,7 +48,7 @@ app.post('/registro', async (req, res) => {
         if (err.code === '23505') {
             return res.status(400).json({ mensaje: 'El nombre de usuario ya existe' });
         }
-        console.error(err);
+        console.error('Error en registro:', err.message);
         res.status(500).json({ mensaje: 'Error interno del servidor' });
     }
 });
@@ -45,6 +56,10 @@ app.post('/registro', async (req, res) => {
 // ENDPOINT LOGIN
 app.post('/login', async (req, res) => {
     const { nombre_usuario, contrasena_usuario } = req.body;
+
+    if (!nombre_usuario || !contrasena_usuario) {
+        return res.status(400).json({ mensaje: 'Todos los campos son obligatorios' });
+    }
 
     try {
         const result = await pool.query(
@@ -60,8 +75,8 @@ app.post('/login', async (req, res) => {
 
         res.json(result.rows[0]);
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Error al iniciar sesion de usuario');
+        console.error('Error en login:', err.message);
+        res.status(500).json({ mensaje: 'Error al iniciar sesión' });
     }
 });
 
@@ -145,8 +160,8 @@ app.get('/consumo/:usuario_id', async (req, res) => {
 
         res.json(result.rows);
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Error al consultar el historial del usuario');
+        console.error('Error consultando historial:', err.message);
+        res.status(500).json({ mensaje: 'Error al consultar el historial' });
     }
 });
 
@@ -166,11 +181,11 @@ app.delete('/consumo/:id_consumo', async (req, res) => {
 
         res.json({ mensaje: 'Consumo eliminado exitosamente' });
     } catch (err) {
-        console.error(err);
+        console.error('Error eliminando consumo:', err.message);
         res.status(500).json({ mensaje: 'Error al eliminar el consumo' });
     }
 });
 
 app.listen(port, () => {
-    console.log(`Servidor escuchando en http://localhost:${port}`);
+    console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
 });
