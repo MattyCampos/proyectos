@@ -1,6 +1,6 @@
 const usuario_id = localStorage.getItem('usuario_id');
 const nombre_usuario = localStorage.getItem('nombre_usuario');
-const API_URL = 'http://localhost:3000';
+const API_URL = window.location.origin;
 
 if (!usuario_id) {
     window.location.href = 'login.html';

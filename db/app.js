@@ -4,14 +4,12 @@ const { Pool } = require('pg');
 const path = require('path');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
+// CONEXION POSTGRES - Usando DATABASE_URL de Render
 const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'tu_consumo',
-    password: '1243',
-    port: 5432,
+    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:1243@localhost:5432/tu_consumo',
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
 app.use(cors());
@@ -67,7 +65,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// ENDPOINT GUARDAR CONSUMO - CORREGIDO
+// ENDPOINT GUARDAR CONSUMO
 app.post('/consumo', async (req, res) => {
     const {
         usuario_id,
@@ -78,49 +76,30 @@ app.post('/consumo', async (req, res) => {
         precio_kwh
     } = req.body;
 
-    console.log('Datos recibidos:', req.body); // Para depuración
-
-    // Validar campos obligatorios
     if (!usuario_id || !mes || !anio || lectura_anterior === undefined || lectura_actual === undefined || !precio_kwh) {
-        return res.status(400).json({ 
-            mensaje: 'Todos los campos son obligatorios' 
-        });
+        return res.status(400).json({ mensaje: 'Todos los campos son obligatorios' });
     }
 
-    // Convertir a números
     const anterior = parseFloat(lectura_anterior);
     const actual = parseFloat(lectura_actual);
     const precio = parseFloat(precio_kwh);
 
-    console.log('Valores convertidos:', { anterior, actual, precio });
-
-    // Validar que sean números válidos
     if (isNaN(anterior) || isNaN(actual) || isNaN(precio)) {
-        return res.status(400).json({ 
-            mensaje: 'Los valores deben ser números válidos' 
-        });
+        return res.status(400).json({ mensaje: 'Los valores deben ser números válidos' });
     }
 
     if (anterior < 0 || actual < 0 || precio < 0) {
-        return res.status(400).json({ 
-            mensaje: 'Los valores no pueden ser negativos' 
-        });
+        return res.status(400).json({ mensaje: 'Los valores no pueden ser negativos' });
     }
 
     if (actual <= anterior) {
-        return res.status(400).json({ 
-            mensaje: 'La lectura actual debe ser mayor que la lectura anterior' 
-        });
+        return res.status(400).json({ mensaje: 'La lectura actual debe ser mayor que la lectura anterior' });
     }
 
-    // Calcular consumo y precio total
     const consumo = actual - anterior;
     const precio_total = consumo * precio;
 
-    console.log('Cálculos:', { consumo, precio_total });
-
     try {
-        // Verificar si ya existe un registro para ese mes/año
         const existe = await pool.query(
             `SELECT id_consumo FROM consumo 
             WHERE usuario_id = $1 AND mes = $2 AND anio = $3`,
@@ -128,9 +107,7 @@ app.post('/consumo', async (req, res) => {
         );
 
         if (existe.rows.length > 0) {
-            return res.status(400).json({ 
-                mensaje: 'Ya existe un registro para este mes y año' 
-            });
+            return res.status(400).json({ mensaje: 'Ya existe un registro para este mes y año' });
         }
 
         const result = await pool.query(
@@ -144,26 +121,17 @@ app.post('/consumo', async (req, res) => {
             [usuario_id, mes, anio, anterior, actual, consumo, precio, precio_total]
         );
 
-        console.log('Registro guardado:', result.rows[0]);
-
         res.status(201).json({
             mensaje: 'Consumo guardado exitosamente',
-            consumo: result.rows[0],
-            calculos: {
-                consumo_kwh: consumo,
-                precio_kwh: precio,
-                precio_total: precio_total
-            }
+            consumo: result.rows[0]
         });
     } catch (err) {
         console.error('Error guardando consumo:', err.message);
-        res.status(500).json({ 
-            mensaje: 'Error al guardar el consumo' 
-        });
+        res.status(500).json({ mensaje: 'Error al guardar el consumo' });
     }
 });
 
-// ENDPOINT HISTORIAL DE USUARIO
+// ENDPOINT HISTORIAL
 app.get('/consumo/:usuario_id', async (req, res) => {
     const { usuario_id } = req.params;
 
@@ -203,7 +171,6 @@ app.delete('/consumo/:id_consumo', async (req, res) => {
     }
 });
 
-// CONEXION LOCALHOST
 app.listen(port, () => {
     console.log(`Servidor escuchando en http://localhost:${port}`);
 });

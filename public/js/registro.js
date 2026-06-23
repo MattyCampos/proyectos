@@ -10,17 +10,10 @@ async function registrarUsuario() {
     }
 
     try {
-        // ❌ Antes: fetch('http://localhost:3000/api/registro')
-        // ✅ Ahora: fetch('http://localhost:3000/registro')
-        const response = await fetch('http://localhost:3000/registro', {
+        const response = await fetch('/registro', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                nombre_usuario,
-                contrasena_usuario
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nombre_usuario, contrasena_usuario })
         });
 
         const data = await response.json();
