@@ -9,18 +9,10 @@ async function registrarUsuario() {
         return;
     }
 
-    if (contrasena_usuario.length < 6) {
-        mensaje.textContent = 'La contraseña debe tener al menos 6 caracteres';
-        mensaje.className = 'error';
-        return;
-    }
-
-    const btn = document.querySelector('button');
-    btn.disabled = true;
-    btn.textContent = 'Registrando...';
-
     try {
-        const response = await fetch('/registro', {
+        // ❌ Antes: fetch('http://localhost:3000/api/registro')
+        // ✅ Ahora: fetch('http://localhost:3000/registro')
+        const response = await fetch('http://localhost:3000/registro', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -47,14 +39,5 @@ async function registrarUsuario() {
         console.error('Error:', err);
         mensaje.textContent = 'Error al conectar con el servidor';
         mensaje.className = 'error';
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Registrarse';
     }
 }
-
-document.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        registrarUsuario();
-    }
-});

@@ -1,4 +1,3 @@
-// Usar ruta relativa - funciona en local y en Render
 async function loginUsuario() {
     const nombre_usuario = document.getElementById('nombre_usuario').value.trim();
     const contrasena_usuario = document.getElementById('contrasena_usuario').value.trim();
@@ -15,7 +14,7 @@ async function loginUsuario() {
     btn.textContent = 'Iniciando sesión...';
 
     try {
-        const response = await fetch('/login', {
+        const response = await fetch('http://localhost:3000/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -31,6 +30,8 @@ async function loginUsuario() {
         if (response.ok) {
             mensaje.textContent = '✅ Sesión iniciada exitosamente';
             mensaje.className = 'success';
+            
+            // Guardar el ID y el NOMBRE del usuario
             localStorage.setItem('usuario_id', data.usuario_id);
             localStorage.setItem('nombre_usuario', data.nombre_usuario);
             
