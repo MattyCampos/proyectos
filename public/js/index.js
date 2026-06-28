@@ -168,7 +168,12 @@ function actualizarGraficos(detalles) {
         type: 'doughnut',
         data: {
             labels: labels,
-            datasets: [{ data: consumos, backgroundColor: colores.slice(0, labels.length) }]
+            datasets: [{ 
+                data: consumos, 
+                backgroundColor: colores.slice(0, labels.length),
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
         },
         options: {
             plugins: { legend: { position: 'bottom' } }
@@ -182,7 +187,8 @@ function actualizarGraficos(detalles) {
             datasets: [{
                 label: 'Consumo mensual (kWh)',
                 data: consumos,
-                backgroundColor: colores.slice(0, labels.length)
+                backgroundColor: colores.slice(0, labels.length),
+                borderRadius: 4
             }]
         },
         options: {
@@ -210,6 +216,7 @@ async function guardarCalculo() {
 
     const btn = document.querySelector('.guardar button');
     btn.disabled = true;
+    btn.textContent = 'Guardando...';
 
     try {
         const response = await fetch('/calcular', {
@@ -224,17 +231,20 @@ async function guardarCalculo() {
         });
 
         const data = await response.json();
+        console.log('Respuesta:', data);
 
         if (response.ok) {
             mostrarMensaje(mensaje, 'Calculo guardado', 'exito');
-            cargarHistorial();
+            await cargarHistorial();
         } else {
             mostrarMensaje(mensaje, data.mensaje || 'Error', 'error');
         }
     } catch (err) {
+        console.error('Error:', err);
         mostrarMensaje(mensaje, 'Error de conexion', 'error');
     } finally {
         btn.disabled = false;
+        btn.textContent = 'Guardar calculo';
     }
 }
 
@@ -246,7 +256,7 @@ async function cargarHistorial() {
         const tabla = document.getElementById('tabla-historial');
 
         if (data.length === 0) {
-            tabla.innerHTML = '<tr><td colspan="6">Sin registros</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="6" style="text-align:center;">Sin registros</td></tr>';
             return;
         }
 
@@ -267,7 +277,8 @@ async function cargarHistorial() {
         }).join('');
 
     } catch (err) {
-        console.error(err);
+        console.error('Error:', err);
+        tabla.innerHTML = '<tr><td colspan="6">Error al cargar historial</td></tr>';
     }
 }
 
