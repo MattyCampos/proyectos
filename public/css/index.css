@@ -210,37 +210,87 @@ nav {
     background: #fed7d7;
 }
 
-/* ===== LISTA ELECTRODOMÉSTICOS ===== */
+/* ===== LISTA ELECTRODOMÉSTICOS - NUEVO DISEÑO ===== */
 .electro-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+@media (max-width: 600px) {
+    .electro-list {
+        grid-template-columns: 1fr;
+    }
 }
 
 .electro-item {
-    background: #edf2f7;
-    padding: 0.5rem 1rem 0.5rem 1.2rem;
-    border-radius: 30px;
+    background: #f7fafc;
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.6rem;
     border: 1px solid #e2e8f0;
-    font-size: 0.9rem;
+    transition: all 0.25s;
+}
+
+.electro-item:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .electro-item .info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.electro-item .nombre {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1rem;
+}
+
+.electro-item .detalles {
+    color: #718096;
+    font-size: 0.85rem;
+}
+
+.electro-item .detalles span {
+    background: #e2e8f0;
+    padding: 0.1rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: #2d3748;
     font-weight: 500;
 }
 
-.electro-item .info span {
-    font-weight: 400;
-    color: #718096;
+.electro-item .btn-delete {
+    background: none;
+    border: none;
+    color: #e53e3e;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 30px;
+    transition: all 0.2s;
+    font-weight: bold;
+}
+
+.electro-item .btn-delete:hover {
+    background: #fed7d7;
+    transform: scale(1.1);
 }
 
 .empty {
     color: #a0aec0;
     font-size: 0.95rem;
-    width: 100%;
+    text-align: center;
+    padding: 2rem 0;
+    grid-column: 1 / -1;
 }
 
 /* ===== KPIS ===== */

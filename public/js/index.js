@@ -74,17 +74,24 @@ async function cargarElectrodomesticos() {
         const container = document.getElementById('lista-electrodomesticos');
 
         if (data.length === 0) {
-            container.innerHTML = '<p>No hay electrodomesticos</p>';
+            container.innerHTML = '<p class="empty">📭 No hay electrodomésticos agregados</p>';
             calcularResultados();
             return;
         }
 
         container.innerHTML = data.map(item => {
             return `
-                <span class="electro-item">
-                    ${item.nombre} (${item.potencia_w}W, ${item.horas_dia}h, ${item.cantidad}x)
-                    <button onclick="eliminarElectrodomestico(${item.id_electro})">x</button>
-                </span>
+                <div class="electro-item">
+                    <div class="info">
+                        <span class="nombre">${item.nombre}</span>
+                        <span class="detalles">
+                            <span>⚡ ${item.potencia_w}W</span>
+                            <span>⏱ ${item.horas_dia}h</span>
+                            <span>📦 ${item.cantidad}x</span>
+                        </span>
+                    </div>
+                    <button class="btn-delete" onclick="eliminarElectrodomestico(${item.id_electro})" title="Eliminar">✕</button>
+                </div>
             `;
         }).join('');
 
