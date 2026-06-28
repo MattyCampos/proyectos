@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tu Consumo - Registro</title>
+    <title>Registro</title>
     <link rel="stylesheet" href="css/registro.css">
 </head>
 <body>
-    <div class="contenedor-registro">
-        <h1>⚡ Tu Consumo</h1>
+
+    <div class="registro-box">
+        <h1>Tu Consumo</h1>
         <h2>Crear Cuenta</h2>
 
-        <input type="text" id="nombre_usuario" placeholder="Nombre de usuario" autocomplete="username">
-        <input type="password" id="contrasena_usuario" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="new-password" minlength="6">
+        <input type="text" id="nombre_usuario" placeholder="Nombre de usuario">
+        <input type="password" id="contrasena_usuario" placeholder="Contraseña">
 
         <button onclick="registrarUsuario()">Registrarse</button>
         <p id="mensaje"></p>
 
-        <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
+        <a href="login.html">Ya tengo cuenta</a>
     </div>
 
     <script src="js/registro.js"></script>

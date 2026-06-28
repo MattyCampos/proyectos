@@ -4,7 +4,13 @@ async function registrarUsuario() {
     const mensaje = document.getElementById('mensaje');
 
     if (!nombre_usuario || !contrasena_usuario) {
-        mensaje.textContent = 'Todos los campos son obligatorios';
+        mensaje.textContent = 'Complete todos los campos';
+        mensaje.className = 'error';
+        return;
+    }
+
+    if (contrasena_usuario.length < 6) {
+        mensaje.textContent = 'Contraseña minimo 6 caracteres';
         mensaje.className = 'error';
         return;
     }
@@ -19,18 +25,21 @@ async function registrarUsuario() {
         const data = await response.json();
 
         if (response.ok) {
-            mensaje.textContent = '✅ Usuario registrado exitosamente';
+            mensaje.textContent = 'Usuario registrado';
             mensaje.className = 'success';
             setTimeout(() => {
                 window.location.href = 'login.html';
             }, 1500);
         } else {
-            mensaje.textContent = data.mensaje || 'Error al registrar';
+            mensaje.textContent = data.mensaje || 'Error';
             mensaje.className = 'error';
         }
     } catch (err) {
-        console.error('Error:', err);
-        mensaje.textContent = 'Error al conectar con el servidor';
+        mensaje.textContent = 'Error de conexion';
         mensaje.className = 'error';
     }
 }
+
+document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') registrarUsuario();
+});

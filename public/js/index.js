@@ -1,269 +1,296 @@
 const usuario_id = localStorage.getItem('usuario_id');
 const nombre_usuario = localStorage.getItem('nombre_usuario');
-const API_URL = window.location.origin;
 
 if (!usuario_id) {
     window.location.href = 'login.html';
 }
 
-let grafico;
+let chartPie = null;
+let chartBarras = null;
+let electrodomesticos = [];
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Mostrar saludo personalizado
     if (nombre_usuario) {
-        document.getElementById('saludo').textContent = `Hola ${nombre_usuario} 👋`;
+        document.getElementById('saludo').textContent = 'Hola ' + nombre_usuario;
     }
-    
+    cargarElectrodomesticos();
     cargarHistorial();
-    document.getElementById('lectura_anterior').addEventListener('input', calcularConsumo);
-    document.getElementById('lectura_actual').addEventListener('input', calcularConsumo);
-    document.getElementById('precio_kwh').addEventListener('input', calcularConsumo);
+    document.getElementById('precio-kwh').addEventListener('input', calcularResultados);
 });
 
-// Función para formatear en pesos chilenos
-function formatoCLP(valor) {
-    return new Intl.NumberFormat('es-CL', {
-        style: 'currency',
-        currency: 'CLP',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(valor);
-}
+async function agregarElectrodomestico() {
+    const nombre = document.getElementById('nombre').value.trim();
+    const potencia = document.getElementById('potencia').value;
+    const horas = document.getElementById('horas').value;
+    const cantidad = document.getElementById('cantidad').value;
+    const mensaje = document.getElementById('mensaje-agregar');
 
-// Función para formatear números con separador de miles
-function formatoNumero(valor, decimales = 0) {
-    return new Intl.NumberFormat('es-CL', {
-        minimumFractionDigits: decimales,
-        maximumFractionDigits: decimales
-    }).format(valor);
-}
-
-function calcularConsumo() {
-    const anterior = parseFloat(document.getElementById('lectura_anterior').value);
-    const actual = parseFloat(document.getElementById('lectura_actual').value);
-    const precio = parseFloat(document.getElementById('precio_kwh').value);
-
-    const resultadoDiv = document.getElementById('resultado-calculado');
-    
-    if (!isNaN(anterior) && !isNaN(actual) && !isNaN(precio) && actual > anterior && precio > 0) {
-        const consumo = actual - anterior;
-        const total = consumo * precio;
-        
-        document.getElementById('consumoCalculado').textContent = formatoNumero(consumo, 2);
-        document.getElementById('precioTotalCalculado').textContent = formatoCLP(total);
-        resultadoDiv.style.display = 'block';
-    } else {
-        resultadoDiv.style.display = 'none';
-    }
-}
-
-async function guardarConsumo() {
-    const mes = document.getElementById('mes').value;
-    const anio = document.getElementById('anio').value;
-    const lectura_anterior = document.getElementById('lectura_anterior').value;
-    const lectura_actual = document.getElementById('lectura_actual').value;
-    const precio_kwh = document.getElementById('precio_kwh').value;
-    const mensaje = document.getElementById('mensaje');
-
-    if (!mes || !anio || !lectura_anterior || !lectura_actual || !precio_kwh) {
-        mostrarMensaje('Todos los campos son obligatorios', 'error');
+    if (!nombre || !potencia || !horas || !cantidad) {
+        mostrarMensaje(mensaje, 'Complete todos los campos', 'error');
         return;
     }
 
-    const anterior = parseFloat(lectura_anterior);
-    const actual = parseFloat(lectura_actual);
-    const precio = parseFloat(precio_kwh);
-
-    if (isNaN(anterior) || isNaN(actual) || isNaN(precio)) {
-        mostrarMensaje('Ingresa valores numéricos válidos', 'error');
-        return;
-    }
-
-    if (anterior < 0 || actual < 0 || precio < 0) {
-        mostrarMensaje('Los valores no pueden ser negativos', 'error');
-        return;
-    }
-
-    if (actual <= anterior) {
-        mostrarMensaje('La lectura actual debe ser mayor que la anterior', 'error');
-        return;
-    }
-
-    if (precio === 0) {
-        mostrarMensaje('El precio por kWh debe ser mayor que 0', 'error');
-        return;
-    }
-
-    const btn = document.querySelector('.btn-guardar');
+    const btn = document.querySelector('.panel button');
     btn.disabled = true;
-    btn.textContent = 'Guardando...';
-
-    const datos = {
-        usuario_id: parseInt(usuario_id),
-        mes: parseInt(mes),
-        anio: parseInt(anio),
-        lectura_anterior: anterior,
-        lectura_actual: actual,
-        precio_kwh: precio
-    };
 
     try {
-        const response = await fetch(`${API_URL}/consumo`, {
+        const response = await fetch('/electrodomesticos', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos)
+            body: JSON.stringify({
+                usuario_id: parseInt(usuario_id),
+                nombre: nombre,
+                potencia_w: parseFloat(potencia),
+                horas_dia: parseFloat(horas),
+                cantidad: parseInt(cantidad)
+            })
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            mostrarMensaje('✅ Consumo guardado exitosamente', 'exito');
-            document.getElementById('lectura_anterior').value = '';
-            document.getElementById('lectura_actual').value = '';
-            document.getElementById('precio_kwh').value = '';
-            document.getElementById('resultado-calculado').style.display = 'none';
-            cargarHistorial();
+            mostrarMensaje(mensaje, 'Agregado correctamente', 'exito');
+            document.getElementById('nombre').value = '';
+            document.getElementById('potencia').value = '';
+            document.getElementById('horas').value = '';
+            document.getElementById('cantidad').value = '';
+            cargarElectrodomesticos();
         } else {
-            mostrarMensaje(data.mensaje || 'Error al guardar', 'error');
+            mostrarMensaje(mensaje, data.mensaje || 'Error', 'error');
         }
     } catch (err) {
-        console.error('Error:', err);
-        mostrarMensaje('Error al conectar con el servidor', 'error');
+        mostrarMensaje(mensaje, 'Error de conexion', 'error');
     } finally {
         btn.disabled = false;
-        btn.textContent = 'Guardar Consumo';
+    }
+}
+
+async function cargarElectrodomesticos() {
+    try {
+        const response = await fetch('/electrodomesticos/' + usuario_id);
+        const data = await response.json();
+        electrodomesticos = data;
+
+        const container = document.getElementById('lista-electrodomesticos');
+
+        if (data.length === 0) {
+            container.innerHTML = '<p>No hay electrodomesticos</p>';
+            calcularResultados();
+            return;
+        }
+
+        container.innerHTML = data.map(item => {
+            return `
+                <span class="electro-item">
+                    ${item.nombre} (${item.potencia_w}W, ${item.horas_dia}h, ${item.cantidad}x)
+                    <button onclick="eliminarElectrodomestico(${item.id_electro})">x</button>
+                </span>
+            `;
+        }).join('');
+
+        calcularResultados();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function eliminarElectrodomestico(id) {
+    if (!confirm('Eliminar este electrodomestico?')) return;
+
+    try {
+        const response = await fetch('/electrodomesticos/' + id, { method: 'DELETE' });
+        if (response.ok) {
+            cargarElectrodomesticos();
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function calcularResultados() {
+    const precioKwh = parseFloat(document.getElementById('precio-kwh').value);
+
+    if (electrodomesticos.length === 0 || !precioKwh || precioKwh <= 0) {
+        document.getElementById('kpi-diario').textContent = '0.00 kWh';
+        document.getElementById('kpi-mensual').textContent = '0.00 kWh';
+        document.getElementById('kpi-costo').textContent = '$0';
+        actualizarGraficos([]);
+        return;
+    }
+
+    const detalles = electrodomesticos.map(item => {
+        const consumoDiario = (item.potencia_w / 1000) * item.horas_dia * item.cantidad;
+        return {
+            nombre: item.nombre,
+            consumoDiario: consumoDiario,
+            consumoMensual: consumoDiario * 30,
+            costoMensual: consumoDiario * 30 * precioKwh
+        };
+    });
+
+    const totalDiario = detalles.reduce((sum, d) => sum + d.consumoDiario, 0);
+    const totalMensual = totalDiario * 30;
+    const totalCosto = totalMensual * precioKwh;
+
+    document.getElementById('kpi-diario').textContent = totalDiario.toFixed(2) + ' kWh';
+    document.getElementById('kpi-mensual').textContent = totalMensual.toFixed(2) + ' kWh';
+    document.getElementById('kpi-costo').textContent = '$' + totalCosto.toFixed(0);
+
+    actualizarGraficos(detalles);
+}
+
+function actualizarGraficos(detalles) {
+    const ctxPie = document.getElementById('grafico-pastel').getContext('2d');
+    const ctxBarras = document.getElementById('grafico-barras').getContext('2d');
+
+    if (chartPie) chartPie.destroy();
+    if (chartBarras) chartBarras.destroy();
+
+    if (detalles.length === 0) {
+        chartPie = new Chart(ctxPie, {
+            type: 'doughnut',
+            data: { labels: ['Sin datos'], datasets: [{ data: [1], backgroundColor: ['#ddd'] }] },
+            options: { plugins: { legend: { display: false } } }
+        });
+        chartBarras = new Chart(ctxBarras, {
+            type: 'bar',
+            data: { labels: ['Sin datos'], datasets: [{ data: [0], backgroundColor: ['#ddd'] }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+        return;
+    }
+
+    const colores = ['#0f3460', '#f7971e', '#e53e3e', '#38a169', '#805ad5', '#319795', '#d69e2e', '#4299e1'];
+    const labels = detalles.map(d => d.nombre);
+    const consumos = detalles.map(d => d.consumoMensual);
+
+    chartPie = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{ data: consumos, backgroundColor: colores.slice(0, labels.length) }]
+        },
+        options: {
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    chartBarras = new Chart(ctxBarras, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Consumo mensual (kWh)',
+                data: consumos,
+                backgroundColor: colores.slice(0, labels.length)
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+}
+
+async function guardarCalculo() {
+    const mes = document.getElementById('mes-calculo').value;
+    const anio = document.getElementById('anio-calculo').value;
+    const precioKwh = document.getElementById('precio-kwh').value;
+    const mensaje = document.getElementById('mensaje-guardar');
+
+    if (!precioKwh || parseFloat(precioKwh) <= 0) {
+        mostrarMensaje(mensaje, 'Ingrese precio kWh', 'error');
+        return;
+    }
+
+    if (electrodomesticos.length === 0) {
+        mostrarMensaje(mensaje, 'Agregue electrodomesticos', 'error');
+        return;
+    }
+
+    const btn = document.querySelector('.guardar button');
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/calcular', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                usuario_id: parseInt(usuario_id),
+                mes: parseInt(mes),
+                anio: parseInt(anio),
+                precio_kwh: parseFloat(precioKwh)
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            mostrarMensaje(mensaje, 'Calculo guardado', 'exito');
+            cargarHistorial();
+        } else {
+            mostrarMensaje(mensaje, data.mensaje || 'Error', 'error');
+        }
+    } catch (err) {
+        mostrarMensaje(mensaje, 'Error de conexion', 'error');
+    } finally {
+        btn.disabled = false;
     }
 }
 
 async function cargarHistorial() {
     try {
-        const response = await fetch(`${API_URL}/consumo/${usuario_id}`);
-        const datos = await response.json();
+        const response = await fetch('/historial/' + usuario_id);
+        const data = await response.json();
 
         const tabla = document.getElementById('tabla-historial');
-        tabla.innerHTML = '';
 
-        let totalConsumo = 0;
-        let totalPrecio = 0;
-        const labels = [];
-        const consumos = [];
+        if (data.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="6">Sin registros</td></tr>';
+            return;
+        }
 
-        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-        datos.forEach(item => {
-            const consumo = parseFloat(item.consumo) || 0;
-            const precioTotal = parseFloat(item.precio_total) || 0;
-            const precioKwh = parseFloat(item.precio_kwh) || 0;
-            const lecturaAnt = parseFloat(item.lectura_anterior) || 0;
-            const lecturaAct = parseFloat(item.lectura_actual) || 0;
-
-            totalConsumo += consumo;
-            totalPrecio += precioTotal;
-            
-            const mesNombre = meses[item.mes - 1] || item.mes;
-            labels.push(`${mesNombre} ${item.anio}`);
-            consumos.push(consumo);
-
-            tabla.innerHTML += `
+        tabla.innerHTML = data.map(item => {
+            return `
                 <tr>
-                    <td>${mesNombre} ${item.anio}</td>
-                    <td>${formatoNumero(lecturaAnt, 2)}</td>
-                    <td>${formatoNumero(lecturaAct, 2)}</td>
-                    <td>${formatoNumero(consumo, 2)}</td>
-                    <td>${formatoCLP(precioKwh)}</td>
-                    <td>${formatoCLP(precioTotal)}</td>
-                    <td>
-                        <button class="btn-eliminar" onclick="eliminarConsumo(${item.id_consumo})">
-                            🗑️
-                        </button>
-                    </td>
+                    <td>${meses[item.mes - 1]}</td>
+                    <td>${item.anio}</td>
+                    <td>${item.consumo_diario.toFixed(2)} kWh</td>
+                    <td>${item.consumo_mensual.toFixed(2)} kWh</td>
+                    <td>$${item.costo_mensual.toFixed(0)}</td>
+                    <td><button class="btn-eliminar" onclick="eliminarCalculo(${item.id_calculo})">Eliminar</button></td>
                 </tr>
             `;
-        });
+        }).join('');
 
-        document.getElementById('kpiConsumo').textContent = `${formatoNumero(totalConsumo, 2)} kWh`;
-        document.getElementById('kpiPrecio').textContent = formatoCLP(totalPrecio);
-        document.getElementById('kpiRegistros').textContent = datos.length;
-
-        crearGrafico(labels, consumos);
     } catch (err) {
-        console.error('Error:', err);
-        mostrarMensaje('Error al cargar el historial', 'error');
+        console.error(err);
     }
 }
 
-async function eliminarConsumo(id_consumo) {
-    if (!confirm('¿Estás seguro de eliminar este registro?')) return;
+async function eliminarCalculo(id) {
+    if (!confirm('Eliminar este calculo?')) return;
 
     try {
-        const response = await fetch(`${API_URL}/consumo/${id_consumo}`, {
-            method: 'DELETE'
-        });
-
+        const response = await fetch('/historial/' + id, { method: 'DELETE' });
         if (response.ok) {
-            mostrarMensaje('✅ Registro eliminado exitosamente', 'exito');
             cargarHistorial();
-        } else {
-            const data = await response.json();
-            mostrarMensaje(data.mensaje || 'Error al eliminar', 'error');
         }
     } catch (err) {
-        console.error('Error:', err);
-        mostrarMensaje('Error al conectar con el servidor', 'error');
+        console.error(err);
     }
 }
 
-function crearGrafico(labels, consumos) {
-    if (grafico) {
-        grafico.destroy();
-    }
-
-    const ctx = document.getElementById('graficoConsumo');
-    grafico = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels.length ? labels : ['Sin datos'],
-            datasets: [{
-                label: 'Consumo (kWh)',
-                data: labels.length ? consumos : [0],
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#764ba2'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: labels.length > 0
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(0,0,0,0.05)' }
-                },
-                x: {
-                    grid: { display: false }
-                }
-            }
-        }
-    });
-}
-
-function mostrarMensaje(texto, tipo) {
-    const mensaje = document.getElementById('mensaje');
-    mensaje.textContent = texto;
-    mensaje.className = tipo;
-    mensaje.style.display = 'block';
-    
+function mostrarMensaje(elemento, texto, tipo) {
+    elemento.textContent = texto;
+    elemento.className = tipo;
+    elemento.style.display = 'block';
     setTimeout(() => {
-        mensaje.style.display = 'none';
-    }, 5000);
+        elemento.style.display = 'none';
+    }, 4000);
 }
 
 function cerrarSesion() {

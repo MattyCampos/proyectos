@@ -3,122 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tu Consumo ⚡</title>
+    <title>Tu Consumo</title>
     <link rel="stylesheet" href="css/index.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
     <nav>
+        <h1>Tu Consumo</h1>
         <div>
-            <h1>⚡ Tu Consumo</h1>
-            <p>Controla tu consumo eléctrico</p>
+            <span id="saludo">Hola</span>
+            <button onclick="cerrarSesion()">Cerrar sesion</button>
         </div>
-        <button onclick="cerrarSesion()">Cerrar sesión</button>
     </nav>
 
-    <main>
-        <section class="hero">
-            <h2 id="saludo">Hola 👋</h2>  
-            <p>Bienvenido a tu panel de consumo energético</p>
-        </section>
+    <div class="container">
 
-        <section class="kpis">
-            <div class="card">
-                <span>⚡</span>
-                <h3>Consumo Total</h3>
-                <p id="kpiConsumo">0 kWh</p>
+        <!-- Agregar electrodomestico -->
+        <div class="panel">
+            <h2>Agregar electrodomestico</h2>
+            <div class="form-row">
+                <input type="text" id="nombre" placeholder="Nombre">
+                <input type="number" id="potencia" placeholder="Potencia (W)">
+                <input type="number" id="horas" placeholder="Horas/dia">
+                <input type="number" id="cantidad" placeholder="Cantidad">
             </div>
-            <div class="card">
-                <span>💰</span>
-                <h3>Gasto Total</h3>
-                <p id="kpiPrecio">$0</p>
-            </div>
-            <div class="card">
-                <span>📋</span>
-                <h3>Registros</h3>
-                <p id="kpiRegistros">0</p>
-            </div>
-        </section>
+            <button onclick="agregarElectrodomestico()">Agregar</button>
+            <p id="mensaje-agregar"></p>
+        </div>
 
-        <section class="contenedor-grid">
-            <div class="panel">
-                <h2>📈 Consumo por Mes</h2>
-                <canvas id="graficoConsumo"></canvas>
+        <!-- Lista de electrodomesticos -->
+        <div class="panel">
+            <h2>Mis electrodomesticos</h2>
+            <div id="lista-electrodomesticos">
+                <p>No hay electrodomesticos</p>
             </div>
+        </div>
 
-            <div class="panel">
-                <h2>➕ Registrar Consumo</h2>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Mes</label>
-                        <select id="mes">
-                            <option value="1">Enero</option>
-                            <option value="2">Febrero</option>
-                            <option value="3">Marzo</option>
-                            <option value="4">Abril</option>
-                            <option value="5">Mayo</option>
-                            <option value="6">Junio</option>
-                            <option value="7">Julio</option>
-                            <option value="8">Agosto</option>
-                            <option value="9">Septiembre</option>
-                            <option value="10">Octubre</option>
-                            <option value="11">Noviembre</option>
-                            <option value="12">Diciembre</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Año</label>
-                        <input type="number" id="anio" value="2026" min="2000">
-                    </div>
+        <!-- Resultados -->
+        <div class="panel">
+            <h2>Resultados</h2>
+            <div class="kpis">
+                <div>
+                    <p>Consumo diario</p>
+                    <p id="kpi-diario">0.00 kWh</p>
                 </div>
-
-                <div class="form-group">
-                    <label>Lectura Anterior (kWh)</label>
-                    <input type="number" id="lectura_anterior" placeholder="Ej: 1000" step="0.01" min="0">
+                <div>
+                    <p>Consumo mensual</p>
+                    <p id="kpi-mensual">0.00 kWh</p>
                 </div>
-
-                <div class="form-group">
-                    <label>Lectura Actual (kWh)</label>
-                    <input type="number" id="lectura_actual" placeholder="Ej: 1250" step="0.01" min="0">
+                <div>
+                    <p>Costo mensual</p>
+                    <p id="kpi-costo">$0</p>
                 </div>
-
-                <div class="form-group">
-                    <label>Precio por kWh ($)</label>
-                    <input type="number" id="precio_kwh" placeholder="Ej: 280" step="0.01" min="0">
-                </div>
-
-                <div id="resultado-calculado" style="display:none; background: #f0f4ff; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-                    <p><strong>Consumo calculado:</strong> <span id="consumoCalculado">0</span> kWh</p>
-                    <p><strong>Precio total:</strong> $<span id="precioTotalCalculado">0</span></p>
-                </div>
-
-                <button class="btn-guardar" onclick="guardarConsumo()">Guardar Consumo</button>
-                <p id="mensaje"></p>
             </div>
-        </section>
 
-        <section class="panel">
-            <h2>📜 Historial</h2>
-            <div class="tabla-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Mes/Año</th>
-                            <th>Lectura Anterior</th>
-                            <th>Lectura Actual</th>
-                            <th>Consumo (kWh)</th>
-                            <th>Precio kWh</th>
-                            <th>Total ($)</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-historial"></tbody>
-                </table>
+            <div class="graficos">
+                <div>
+                    <h3>Distribucion</h3>
+                    <canvas id="grafico-pastel"></canvas>
+                </div>
+                <div>
+                    <h3>Consumo por electrodomestico</h3>
+                    <canvas id="grafico-barras"></canvas>
+                </div>
             </div>
-        </section>
-    </main>
+
+            <div class="guardar">
+                <input type="number" id="precio-kwh" placeholder="Precio kWh">
+                <select id="mes-calculo">
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+                <input type="number" id="anio-calculo" placeholder="Año" value="2026">
+                <button onclick="guardarCalculo()">Guardar calculo</button>
+                <p id="mensaje-guardar"></p>
+            </div>
+        </div>
+
+        <!-- Historial -->
+        <div class="panel">
+            <h2>Historial</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Año</th>
+                        <th>Consumo diario</th>
+                        <th>Consumo mensual</th>
+                        <th>Costo</th>
+                        <th>Accion</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-historial"></tbody>
+            </table>
+        </div>
+
+    </div>
 
     <script src="js/index.js"></script>
 </body>

@@ -1,45 +1,49 @@
-create table usuario(
-	usuario_id serial primary key,
-	nombre_usuario varchar(50) unique not null,
-	contrasena_usuario varchar(255) not null
+CREATE TABLE usuario(
+    usuario_id SERIAL PRIMARY KEY,
+    nombre_usuario VARCHAR(50) UNIQUE NOT NULL,
+    contrasena_usuario VARCHAR(255) NOT NULL
 );
 
-create table consumo(
-	id_consumo serial primary key,
-	usuario_id integer references usuario(usuario_id),
-	mes integer not null,
-	anio integer not null,
-	consumo integer not null,
-	precio integer not null
+CREATE TABLE electrodomesticos(
+    id_electro SERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES usuario(usuario_id),
+    nombre VARCHAR(100) NOT NULL,
+    potencia_w DECIMAL(10,2) NOT NULL,
+    horas_dia DECIMAL(5,2) NOT NULL,
+    cantidad INTEGER NOT NULL
 );
 
-insert into usuario (nombre_usuario, contrasena_usuario)
-values ('admin', 'admin');
-
-insert into consumo (usuario_id, mes, anio, consumo, precio)
-values 
-(1, 1, 2026, 350, 35000),
-(1, 2, 2026, 420, 42000),
-(1, 3, 2026, 380, 38000);
-
-select * from usuario
-select * from consumo
-
--- Eliminar tabla y recrearla (PERDERÁS LOS DATOS EXISTENTES)
-DROP TABLE IF EXISTS consumo;
-
-CREATE TABLE consumo (
-    id_consumo SERIAL PRIMARY KEY,
+CREATE TABLE calculos_historial (
+    id_calculo SERIAL PRIMARY KEY,
     usuario_id INTEGER REFERENCES usuario(usuario_id) ON DELETE CASCADE,
     mes INTEGER NOT NULL CHECK (mes BETWEEN 1 AND 12),
     anio INTEGER NOT NULL CHECK (anio >= 2000),
-    lectura_anterior DECIMAL(10,2) NOT NULL DEFAULT 0,
-    lectura_actual DECIMAL(10,2) NOT NULL DEFAULT 0,
-    consumo DECIMAL(10,2) NOT NULL DEFAULT 0,
-    precio_kwh DECIMAL(10,2) NOT NULL DEFAULT 0,
-    precio_total DECIMAL(10,2) NOT NULL DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    consumo_diario DECIMAL(10,2) NOT NULL,
+    consumo_mensual DECIMAL(10,2) NOT NULL,
+    costo_mensual DECIMAL(10,2) NOT NULL,
+    precio_kwh DECIMAL(10,2) NOT NULL
 );
 
-CREATE INDEX idx_consumo_usuario ON consumo(usuario_id);
-CREATE INDEX idx_consumo_fecha ON consumo(anio, mes);
+CREATE TABLE detalle_calculo (
+    id_detalle SERIAL PRIMARY KEY,
+    id_calculo INTEGER REFERENCES calculos_historial(id_calculo) ON DELETE CASCADE,
+    electrodomestico_nombre VARCHAR(100) NOT NULL,
+    potencia_w DECIMAL(10,2) NOT NULL,
+    horas_dia DECIMAL(5,2) NOT NULL,
+    cantidad INTEGER NOT NULL,
+    consumo_diario DECIMAL(10,2) NOT NULL,
+    consumo_mensual DECIMAL(10,2) NOT NULL,
+    costo_mensual DECIMAL(10,2) NOT NULL
+);
+
+-- Insertar un usuario de prueba
+INSERT INTO usuario (nombre_usuario, contrasena_usuario) 
+VALUES ('demo', 'demo123');
+
+-- Insertar electrodomésticos de ejemplo
+INSERT INTO electrodomesticos (usuario_id, nombre, potencia_w, horas_dia, cantidad) VALUES
+(1, 'Refrigerador', 180, 24, 1),
+(1, 'TV', 120, 6, 1),
+(1, 'Notebook', 80, 8, 1),
+(1, 'Microondas', 1000, 0.5, 1),
+(1, 'Ampolletas LED', 10, 5, 8);
