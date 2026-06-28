@@ -235,9 +235,10 @@ async function guardarCalculo() {
 
         if (response.ok) {
             mostrarMensaje(mensaje, 'Calculo guardado', 'exito');
+            // Limpiar campos y recargar
             await cargarHistorial();
         } else {
-            mostrarMensaje(mensaje, data.mensaje || 'Error', 'error');
+            mostrarMensaje(mensaje, data.mensaje || 'Error al guardar', 'error');
         }
     } catch (err) {
         console.error('Error:', err);
@@ -245,40 +246,6 @@ async function guardarCalculo() {
     } finally {
         btn.disabled = false;
         btn.textContent = 'Guardar calculo';
-    }
-}
-
-async function cargarHistorial() {
-    try {
-        const response = await fetch('/historial/' + usuario_id);
-        const data = await response.json();
-
-        const tabla = document.getElementById('tabla-historial');
-
-        if (data.length === 0) {
-            tabla.innerHTML = '<tr><td colspan="6" style="text-align:center;">Sin registros</td></tr>';
-            return;
-        }
-
-        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-
-        tabla.innerHTML = data.map(item => {
-            return `
-                <tr>
-                    <td>${meses[item.mes - 1]}</td>
-                    <td>${item.anio}</td>
-                    <td>${item.consumo_diario.toFixed(2)} kWh</td>
-                    <td>${item.consumo_mensual.toFixed(2)} kWh</td>
-                    <td>$${item.costo_mensual.toFixed(0)}</td>
-                    <td><button class="btn-eliminar" onclick="eliminarCalculo(${item.id_calculo})">Eliminar</button></td>
-                </tr>
-            `;
-        }).join('');
-
-    } catch (err) {
-        console.error('Error:', err);
-        tabla.innerHTML = '<tr><td colspan="6">Error al cargar historial</td></tr>';
     }
 }
 
