@@ -235,7 +235,6 @@ async function guardarCalculo() {
 
         if (response.ok) {
             mostrarMensaje(mensaje, 'Calculo guardado', 'exito');
-            // Limpiar campos y recargar
             await cargarHistorial();
         } else {
             mostrarMensaje(mensaje, data.mensaje || 'Error al guardar', 'error');
@@ -246,6 +245,52 @@ async function guardarCalculo() {
     } finally {
         btn.disabled = false;
         btn.textContent = 'Guardar calculo';
+    }
+}
+
+async function cargarHistorial() {
+    try {
+        const response = await fetch('/historial/' + usuario_id);
+        const data = await response.json();
+
+        const tabla = document.getElementById('tabla-historial');
+
+        if (!tabla) {
+            console.error('No se encontró el elemento tabla-historial');
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="6" style="text-align:center;">Sin registros</td></tr>';
+            return;
+        }
+
+        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+        tabla.innerHTML = data.map(item => {
+            const diario = parseFloat(item.consumo_diario) || 0;
+            const mensual = parseFloat(item.consumo_mensual) || 0;
+            const costo = parseFloat(item.costo_mensual) || 0;
+
+            return `
+                <tr>
+                    <td>${meses[item.mes - 1] || item.mes}</td>
+                    <td>${item.anio || 0}</td>
+                    <td>${diario.toFixed(2)} kWh</td>
+                    <td>${mensual.toFixed(2)} kWh</td>
+                    <td>$${costo.toFixed(0)}</td>
+                    <td><button class="btn-eliminar" onclick="eliminarCalculo(${item.id_calculo})">Eliminar</button></td>
+                </tr>
+            `;
+        }).join('');
+
+    } catch (err) {
+        console.error('Error cargando historial:', err);
+        const tabla = document.getElementById('tabla-historial');
+        if (tabla) {
+            tabla.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Error al cargar historial</td></tr>';
+        }
     }
 }
 
