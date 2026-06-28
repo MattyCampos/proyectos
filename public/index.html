@@ -1,112 +1,125 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tu Consumo</title>
-    <link rel="stylesheet" href="css/index.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⚡ Tu Consumo</title>
+    <link rel="stylesheet" href="css/index.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
+    <!-- ====== NAVBAR ====== -->
     <nav>
-        <h1>Tu Consumo</h1>
-        <div>
-            <span id="saludo">Hola</span>
-            <button onclick="cerrarSesion()">Cerrar sesion</button>
+        <div class="nav-brand">
+            <span>⚡</span>
+            <h1>Tu Consumo</h1>
+        </div>
+        <div class="nav-user">
+            <span id="saludo">👋 Hola</span>
+            <button onclick="cerrarSesion()">🚪 Salir</button>
         </div>
     </nav>
 
     <div class="container">
 
-        <!-- Agregar electrodomestico -->
+        <!-- ====== AGREGAR ELECTRODOMÉSTICO ====== -->
         <div class="panel">
-            <h2>Agregar electrodomestico</h2>
+            <h2>📦 Agregar electrodoméstico</h2>
             <div class="form-row">
-                <input type="text" id="nombre" placeholder="Nombre">
-                <input type="number" id="potencia" placeholder="Potencia (W)">
-                <input type="number" id="horas" placeholder="Horas/dia">
-                <input type="number" id="cantidad" placeholder="Cantidad">
+                <input type="text" id="nombre" placeholder="Nombre" />
+                <input type="number" id="potencia" placeholder="Potencia (W)" />
+                <input type="number" id="horas" placeholder="Horas/día" />
+                <input type="number" id="cantidad" placeholder="Cantidad" />
             </div>
-            <button onclick="agregarElectrodomestico()">Agregar</button>
+            <button class="btn-primary" onclick="agregarElectrodomestico()">➕ Agregar</button>
             <p id="mensaje-agregar"></p>
         </div>
 
-        <!-- Lista de electrodomesticos -->
+        <!-- ====== LISTA DE ELECTRODOMÉSTICOS ====== -->
         <div class="panel">
-            <h2>Mis electrodomesticos</h2>
-            <div id="lista-electrodomesticos">
-                <p>No hay electrodomesticos</p>
+            <h2>📋 Mis electrodomésticos</h2>
+            <div id="lista-electrodomesticos" class="electro-list">
+                <p class="empty">No hay electrodomésticos</p>
             </div>
         </div>
 
-        <!-- Resultados -->
+        <!-- ====== RESULTADOS ====== -->
         <div class="panel">
-            <h2>Resultados</h2>
+            <h2>📊 Resultados</h2>
+
             <div class="kpis">
-                <div>
-                    <p>Consumo diario</p>
-                    <p id="kpi-diario">0.00 kWh</p>
+                <div class="kpi">
+                    <span>⚡</span>
+                    <p class="kpi-label">Consumo diario</p>
+                    <p class="kpi-value" id="kpi-diario">0.00 kWh</p>
                 </div>
-                <div>
-                    <p>Consumo mensual</p>
-                    <p id="kpi-mensual">0.00 kWh</p>
+                <div class="kpi">
+                    <span>📅</span>
+                    <p class="kpi-label">Consumo mensual</p>
+                    <p class="kpi-value" id="kpi-mensual">0.00 kWh</p>
                 </div>
-                <div>
-                    <p>Costo mensual</p>
-                    <p id="kpi-costo">$0</p>
+                <div class="kpi">
+                    <span>💰</span>
+                    <p class="kpi-label">Costo mensual</p>
+                    <p class="kpi-value" id="kpi-costo">$0</p>
                 </div>
             </div>
 
             <div class="graficos">
-                <div>
-                    <h3>Distribucion</h3>
+                <div class="grafico-box">
+                    <h3>🎯 Distribución</h3>
                     <canvas id="grafico-pastel"></canvas>
                 </div>
-                <div>
-                    <h3>Consumo por electrodomestico</h3>
+                <div class="grafico-box">
+                    <h3>📊 Consumo por electrodoméstico</h3>
                     <canvas id="grafico-barras"></canvas>
                 </div>
             </div>
 
+            <!-- ====== GUARDAR CÁLCULO ====== -->
             <div class="guardar">
-                <input type="number" id="precio-kwh" placeholder="Precio kWh">
-                <select id="mes-calculo">
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                </select>
-                <input type="number" id="anio-calculo" placeholder="Año" value="2026">
-                <button onclick="guardarCalculo()">Guardar calculo</button>
+                <div class="guardar-fila">
+                    <input type="number" id="precio-kwh" placeholder="Precio kWh" />
+                    <select id="mes-calculo">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                    <input type="number" id="anio-calculo" placeholder="Año" value="2026" />
+                </div>
+                <button class="btn-save" onclick="guardarCalculo()">💾 Guardar cálculo</button>
                 <p id="mensaje-guardar"></p>
             </div>
         </div>
 
-        <!-- Historial -->
+        <!-- ====== HISTORIAL ====== -->
         <div class="panel">
-            <h2>Historial</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Mes</th>
-                        <th>Año</th>
-                        <th>Consumo diario</th>
-                        <th>Consumo mensual</th>
-                        <th>Costo</th>
-                        <th>Accion</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-historial"></tbody>
-            </table>
+            <h2>📜 Historial</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mes</th>
+                            <th>Año</th>
+                            <th>Consumo diario</th>
+                            <th>Consumo mensual</th>
+                            <th>Costo</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-historial"></tbody>
+                </table>
+            </div>
         </div>
 
     </div>
